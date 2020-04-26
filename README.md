@@ -66,6 +66,8 @@ fill(float red, float green, float blue, float a);
 
 fillRandom();
 
+tint(Color color);
+
 stroke(Color c);
 
 circle(float x, float y, float r);
@@ -93,9 +95,20 @@ rint(int bound);
 
 float noise(float x, float y);
 	
-distance(float x1, float y1, float x2, float y2);
+double distance(float x1, float y1, float x2, float y2);
 
-distance(Vector2 p1, Vector2 p2);
+double distance(Vector2 p1, Vector2 p2);
+
+## Input Calls
+You can access various inputs such as mouse & keyboard.
+
+float mouseX();
+
+float mouseY();
+
+boolean key(int keyCode) // Uses Keys LibGDX class
+
+boolean keyJust(int keyCode) // single key press
 
 ## Texture Calls
 Texture texture(String path);
@@ -118,3 +131,20 @@ You can use texture regions to only draw parts of textures:
 You can then use the draw(TextureRegion region, x, y); to draw the region to a x,y position
 
 ```draw(player, 0,0) //draw player at (0,0)```
+
+## Camera Functions
+
+Sketch also have functions to control the camera:
+
+### Auto Camera
+Auto camera is a quick way to get caera functionality.
+```autoCamera(float camSpeed, float zoomFactor);```
+Zoom factor is the value that multiplies the current zoomLevel. 
+So a zoomFactor of 1.1 will increase the zoom by %10 each zoom.
+For correct behaviour zoomFactor > 1
+
+camSpeed is the translation of the camera after each key press.
+For correct behaviour camSpeed must be positive
+
+The "O" & "L" keys are used to zoom in and out. WASD are used for moving the camera.
+
