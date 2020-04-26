@@ -58,15 +58,46 @@ This method is where you update any drawing objects that need to be rendered. Ty
 The SketchTool.java contains the list of draw & tooling methods that can be used
 Some common examples are:
 
+draw(TextureRegion texture, float x, float y);
+
 fill(Color color);
+
 fill(float red, float green, float blue, float a);
+
 fillRandom();
+
 stroke(Color c);
+
 circle(float x, float y, float r);
+
 circle(Vector2 pos, float r);
+
 rect(float x, float y, float w, float h);
+
 rect(Rectangle r);
+
 line(Vector2 p1, Vector2 p2);
+
 line(float x1, float y1, float x2, float y2);
+
 translate(float x, float y);
+
 camera(float x, float y);
+
+## Math Calls
+rfloat();
+
+rfloat(float bound);
+
+rint(int bound);
+
+float noise(float x, float y);
+	
+distance(float x1, float y1, float x2, float y2);
+
+distance(Vector2 p1, Vector2 p2);
+
+## Texture Calls
+Texture texture(String path);
+
+TextureRegion region(Texture texure, int x, int y, int w, int h);
