@@ -101,3 +101,20 @@ distance(Vector2 p1, Vector2 p2);
 Texture texture(String path);
 
 TextureRegion region(Texture texure, int x, int y, int w, int h);
+
+
+## Drawing Textures
+
+Using the LibGDX framework, Sketch allows you to load Textures & TextureRegion's using the built in LibGDX classes.
+To create a texture add it to the ```assets/``` directory.
+load a texture by using:
+
+```Texture spritesheet = texture("game_sprites.png);" ```
+
+You can use texture regions to only draw parts of textures:
+
+```TextureRegion player = region(spritesheet, 0,0, 16, 16); // load 16x16 sprite at (x,y):0,0```
+
+You can then use the draw(TextureRegion region, x, y); to draw the region to a x,y position
+
+```draw(player, 0,0) //draw player at (0,0)```
