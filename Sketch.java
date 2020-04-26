@@ -27,6 +27,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 
 public abstract class Sketch implements SketchTool
 {
+	
 	private ShapeRenderer shape;
 	private final Color color;
 	private final Color clear;
@@ -40,9 +41,12 @@ public abstract class Sketch implements SketchTool
 	private float width;
 	private float height;
 	
+	private float totalTime = 0;
+	
 	private Random random; 
 	
 	private Vector3 mouse;
+	
 
 	private NoiseAlgorithm noiseAlgo;
 	
@@ -63,10 +67,22 @@ public abstract class Sketch implements SketchTool
 			//worldMosue.z = 0;
 			mouseMoved = true;
 
-			camera.unproject(mouse);
+			screenCam.unproject(mouse);
+			
+			//dotX=(touchX*480)/width;
+			//dotY=320-(touchY*320/height);
+			
 			return true;
 		}
 	};
+	
+	
+	
+	@Override
+	public float elapsed() {
+		return totalTime;
+	}
+
 	public boolean mouseMoved() {
 		return mouseMoved;
 	}
@@ -79,9 +95,7 @@ public abstract class Sketch implements SketchTool
 	public float mouseY() {
 		return mouse.y;
 	}
-	
-	
-	
+
 	public Sketch() {
 		font = new BitmapFont();
 
@@ -107,6 +121,7 @@ public abstract class Sketch implements SketchTool
 		Gdx.input.setInputProcessor(input);
 	
 	}
+	
 	@Override public void overlay() {
 		
 	}
@@ -131,16 +146,69 @@ public abstract class Sketch implements SketchTool
 	@Override public int rint(int bound) {return random.nextInt(bound);}
 	@Override public float noise(float x, float y) {return (float) noiseAlgo.noise(x, y);}
 	
+	@Override public float mod(float value) {return Math.abs(value);}
+	@Override public double mod(double value) {return Math.abs(value);}
+	@Override public double sin(float x) {return Math.sin(x);}
+	@Override public double cos(float x) {return Math.cos(x);}
+	@Override public double min(float v1, float v2) {return Math.min(v1, v2);}
+	@Override public double max(float v1, float v2) {return Math.max(v1, v2);}
+
+	@Override public float clampf(float value, float min, float max)
+	{return (float) clampd(value, min, max);}
+
+	@Override
+	public double clampd(double value, double min, double max) {
+		if(value < min)
+			return min;
+		if(value > max)
+			return max;
+		return value;
+	}
+
+	@Override
+	public Rectangle bounds(float x, float y, float width, float height) {
+		return new Rectangle(x, y, width, height);
+		
+	}
+	@Override public Vector2 vector2(float x, float y) {return new Vector2(x,y);}
+	
+	
+	
+	@Override
+	public float[] fvector(float x, float y) {
+		float[] vector = new float[2];
+		vector[0] =x;
+		vector[1] = y;
+		
+		return vector;
+	}
+
+	@Override
+	public float[] clamp(float[] coord, float xMin, float xMax, float yMin, float yMax) {
+		if(coord.length == 2) {
+			coord[0] = clampf(coord[0], xMin, xMax);
+			coord[1] = clampf(coord[1], yMin, yMax);
+		}
+		return coord;
+	}
+
+	@Override
+	public float[] clamp(float[] coord, Rectangle bounds) {
+		return clamp(coord, bounds.x, bounds.x+ width, bounds.y, bounds.y + bounds.height);
+	}
+
 	public void render() {
 		mouseMoved = false;
 		Gdx.gl.glClearColor(clear.r, clear.b, clear.g, clear.a);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		//spriteBatch.setProjectionMatrix(projection);
+		float deltaTime =Gdx.graphics.getDeltaTime();
+		totalTime += deltaTime;
 		
 		camera.update();
 		shape.setProjectionMatrix(camera.combined);
 		spriteBatch.setProjectionMatrix(camera.combined);
-		update(Gdx.graphics.getDeltaTime());
+		update(deltaTime);
 		shape.begin();
 		spriteBatch.begin();
 		draw();
@@ -188,6 +256,23 @@ public abstract class Sketch implements SketchTool
 	@Override
 	public final void circle(Vector2 pos, float r) {circle(pos.x, pos.y, r);}
 	
+	
+	
+	@Override
+	public void circle(float[] fvector, float r) {
+		circle(fvector[0], fvector[1], r);
+	}
+
+	@Override
+	public void rect(float[] fvector, float w, float height) {
+		rect(fvector[0], fvector[1], w, height);
+	}
+
+	@Override
+	public void line(float[] v1, float[] v2) {
+		line(v1[0], v1[1], v2[0], v2[1]);
+	}
+
 	@Override
 	public final void rect(float x, float y, float w, float h) {
 		shape.rect(x, y, w,h);
@@ -200,6 +285,7 @@ public abstract class Sketch implements SketchTool
 	public final void line(Vector2 p1, Vector2 p2) {
 		shape.line(p1, p2);
 	}
+	
 	@Override
 	public final void line(float x1, float y1, float x2, float y2) {
 		shape.line(x1, y1, x2, y2);
@@ -215,7 +301,9 @@ public abstract class Sketch implements SketchTool
 
 	@Override
 	public void resize(int width, int height) {
-		port.update(width, height);}
+		port.update(width, height);
+		port.apply();
+	}
 	@Override
 	public void seedRandom(long seed) {
 		random.setSeed(seed);}
