@@ -3,7 +3,9 @@ package app.phoenixshell.kelpie2d.draw;
 import java.util.Random;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -17,8 +19,16 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+
+import app.phoenixshell.kelpie2d.draw.Structs.ComplexShape;
+import app.phoenixshell.kelpie2d.draw.Structs.FloatMatrix;
+import app.phoenixshell.kelpie2d.draw.Structs.IntMatrix;
+import app.phoenixshell.kelpie2d.toolkit.Kelpie2DToolkit;
 
 /**
  *  The main implementation of the SketchTool. Contains all the drawing & math functions
@@ -27,6 +37,10 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 
 public abstract class Sketch implements SketchTool
 {
+	private Kelpie2DToolkit kelpieToolkit;
+	
+	private int VHeight = 800;
+	private int VWIDTH = 1080;
 	
 	private ShapeRenderer shape;
 	private final Color color;
@@ -34,28 +48,44 @@ public abstract class Sketch implements SketchTool
 	
 	private OrthographicCamera camera;
 	private OrthographicCamera screenCam;
+
 	
 	private Viewport port;
-	private Viewport screenViewport;
+	private Viewport screenPort;
 	
-	private float width;
-	private float height;
+	private SpriteBatch spriteBatch;
+	private UIBatch uiBatch;
 	
 	private float totalTime = 0;
 	
 	private Random random; 
 	
 	private Vector3 mouse;
+	private Vector3 mouseWorld = new Vector3();
 	
 
 	private NoiseAlgorithm noiseAlgo;
-	
-	private Batch spriteBatch;
 	private boolean mouseMoved;
-	
-	
 	private BitmapFont font;
 	
+	
+	
+	/*sample minimap*/
+	Camera miniCam;
+	Viewport miniView;
+	
+	public Kelpie2DToolkit getToolkit() {
+		return kelpieToolkit;
+	}
+	
+	
+	@Override
+	public boolean click() {
+		// TODO Auto-generated method stub
+		return Gdx.input.isButtonPressed(Input.Buttons.LEFT);
+	}
+
+
 	private BaseInputProcessor input = new BaseInputProcessor() {
 
 		@Override
@@ -63,11 +93,20 @@ public abstract class Sketch implements SketchTool
 			mouse.x = screenX;
 			mouse.y = screenY;
 			mouse.z = 0;
+			
+			mouseWorld.x = mouse.x;
+			mouseWorld.y = mouse.y;
+			
+			//System.out.printf("mx: %f,%f\n", mouse.x, mouse.y);
 		
 			//worldMosue.z = 0;
 			mouseMoved = true;
 
-			screenCam.unproject(mouse);
+			screenCam.unproject(mouse, screenPort.getScreenX(), 
+					screenPort.getScreenY(), screenPort.getScreenWidth(), screenPort.getScreenHeight());
+			
+			camera.unproject(mouseWorld, screenPort.getScreenX(), 
+					screenPort.getScreenY(), screenPort.getScreenWidth(), screenPort.getScreenHeight());
 			
 			//dotX=(touchX*480)/width;
 			//dotY=320-(touchY*320/height);
@@ -76,8 +115,39 @@ public abstract class Sketch implements SketchTool
 		}
 	};
 	
+	@Override
+	public void drawCursor(Color color, float size) {
+		fill(color);
+		circle(mouse.x, mouse.y, size);
+	}
 	
 	
+
+
+
+	@Override
+	public Vector3 mouseWorld() {
+		
+		return mouseWorld;
+	}
+
+
+	public void onCreate(Kelpie2DToolkit kelpieToolkit) {
+		this.kelpieToolkit = kelpieToolkit;
+	}
+	
+	public Vector3 mouse() {
+
+		return mouse;
+	}
+	
+	
+	
+	@Override
+	public ShapeRenderer shaperRenderer() {
+		return shape;
+	}
+
 	@Override
 	public float elapsed() {
 		return totalTime;
@@ -97,32 +167,47 @@ public abstract class Sketch implements SketchTool
 	}
 
 	public Sketch() {
-		font = new BitmapFont();
+		this.font = new BitmapFont();
+	
+		this.spriteBatch = new SpriteBatch();
+		
+		this.shape = new ShapeRenderer();
+		this.color = new Color();
+		this.clear = new Color(Color.WHITE);
+		this.random = new Random();
+		this.mouse = new Vector3();
+		this.noiseAlgo = new SimplexNoise((int)System.currentTimeMillis());
+		
+		
+		this.shape.setAutoShapeType(true);
+		
+		
+				;// Gdx.graphics.getHeight();
+		
+		this.camera = new OrthographicCamera(VWIDTH, VHeight);
+		screenCam = new OrthographicCamera(VWIDTH, VHeight);
+		
+		port = new FitViewport(VWIDTH, VHeight,camera);
+		screenPort = new FitViewport(VWIDTH, VHeight);
+		//screenPort.apply(false);
+		
+		
+		
+		this.uiBatch = new UIBatch(spriteBatch, screenPort);
+		//stage.setViewport(screenViewport);
+		
 
-		spriteBatch = new SpriteBatch();
-		shape = new ShapeRenderer();
-		color = new Color();
-		clear = new Color(Color.WHITE);
-		random = new Random();
-		mouse = new Vector3();
-		noiseAlgo = new SimplexNoise((int)System.currentTimeMillis());
 		
 		
-		shape.setAutoShapeType(true);
-		
-		float width = Gdx.graphics.getWidth();
-		float height = Gdx.graphics.getHeight();
-		
-		camera = new OrthographicCamera(width, height);
-		screenCam = new OrthographicCamera(width, height);
-		port = new FitViewport(width, height,camera);
-		screenViewport = new FitViewport(width, height, screenCam);
 		
 		Gdx.input.setInputProcessor(input);
-	
+		
+		/*miniMapVoiew*/
+		miniCam = new OrthographicCamera(300, 300);
+		miniView = new FitViewport(300, 300);
 	}
 	
-	@Override public void overlay() {
+	@Override public void overlay(UIBatch batch) {
 		
 	}
 	@Override public abstract void draw();
@@ -146,6 +231,7 @@ public abstract class Sketch implements SketchTool
 	@Override public int rint(int bound) {return random.nextInt(bound);}
 	@Override public float noise(float x, float y) {return (float) noiseAlgo.noise(x, y);}
 	
+	@Override public float noise(float x, float y, float z) {return (float) noiseAlgo.noise(x, y,z);}
 	@Override public float mod(float value) {return Math.abs(value);}
 	@Override public double mod(double value) {return Math.abs(value);}
 	@Override public double sin(float x) {return Math.sin(x);}
@@ -194,7 +280,7 @@ public abstract class Sketch implements SketchTool
 
 	@Override
 	public float[] clamp(float[] coord, Rectangle bounds) {
-		return clamp(coord, bounds.x, bounds.x+ width, bounds.y, bounds.y + bounds.height);
+		return clamp(coord, bounds.x, bounds.x+ bounds.width, bounds.y, bounds.y + bounds.height);
 	}
 
 	public void render() {
@@ -205,9 +291,12 @@ public abstract class Sketch implements SketchTool
 		float deltaTime =Gdx.graphics.getDeltaTime();
 		totalTime += deltaTime;
 		
+		
+		/*game world viewport/camera updates*/
 		camera.update();
 		shape.setProjectionMatrix(camera.combined);
 		spriteBatch.setProjectionMatrix(camera.combined);
+		
 		update(deltaTime);
 		shape.begin();
 		spriteBatch.begin();
@@ -215,16 +304,42 @@ public abstract class Sketch implements SketchTool
 		shape.end();
 		spriteBatch.end();
 		
+	
+		/*screen updates*/
 		screenCam.update();
 		
 		shape.setProjectionMatrix(screenCam.combined);
 		spriteBatch.setProjectionMatrix(screenCam.combined);
 		spriteBatch.begin();
 		shape.begin();
-		overlay();
+		
+		overlay(uiBatch);
 		spriteBatch.end();
 		shape.end();
+		
+		/*mini updates*/
+		miniCam.update();
+		spriteBatch.begin();
+		shape.begin();
+		shape.setProjectionMatrix(miniCam.combined);
+		draw();
+		shape.end();
+		spriteBatch.end();
+		
+		
 	}
+
+
+	@Override
+	public void draw(ComplexShape cshape, float x, float y, float rotation) {
+		shape.identity();
+		shape.translate(x, y, 0);
+		shape.rotate(0, 0, 1, rotation);
+		cshape.onDraw(this);
+		shape.identity();
+		
+	}
+
 	@Override
 	public Texture texture(String path) {
 		return new Texture(Gdx.files.internal(path));
@@ -252,7 +367,8 @@ public abstract class Sketch implements SketchTool
 		shape.set(ShapeType.Line);
 	}
 	@Override
-	public final void circle(float x, float y, float r) {shape.circle(x, y, r);}
+	public final void circle(float x, float y, float r) {
+		shape.circle(x, y, r);}
 	@Override
 	public final void circle(Vector2 pos, float r) {circle(pos.x, pos.y, r);}
 	
@@ -272,6 +388,8 @@ public abstract class Sketch implements SketchTool
 	public void line(float[] v1, float[] v2) {
 		line(v1[0], v1[1], v2[0], v2[1]);
 	}
+	
+	
 
 	@Override
 	public final void rect(float x, float y, float w, float h) {
@@ -286,10 +404,35 @@ public abstract class Sketch implements SketchTool
 		shape.line(p1, p2);
 	}
 	
+	
 	@Override
 	public final void line(float x1, float y1, float x2, float y2) {
 		shape.line(x1, y1, x2, y2);
 	}
+	
+	@Override
+	public void tri(float x1, float y1, float x2, float y2, float x3, float y3) {
+		shape.triangle(x1, y1, x2, y2, x3, y3);
+	}
+
+	@Override
+	public void triat(float x, float y, float width, float height) {
+		triat(x,y, width, height, 0);	
+	}
+
+	@Override
+	public void triat(float x, float y, float width, float height, float rotation) {
+		//shape.identity();
+		//shape.identity();
+		shape.translate(x, y, 0);
+		
+		shape.rotate(0, 0, 1, rotation);
+		tri(- width /2,  - height /2, 0,  + height/2,  + width /2,   - height /2);
+		//shape.identity();
+		
+		
+	}
+
 	@Override
 	public double distance(float x1, float y1, float x2, float y2) {
 		return Vector2.dst(x1, y1, x2, y2);
@@ -301,8 +444,9 @@ public abstract class Sketch implements SketchTool
 
 	@Override
 	public void resize(int width, int height) {
-		port.update(width, height);
-		port.apply();
+	
+		port.update(width, height, true);
+		screenPort.update(width, height, false);
 	}
 	@Override
 	public void seedRandom(long seed) {
@@ -343,7 +487,15 @@ public abstract class Sketch implements SketchTool
 		
 	}
 	@Override
-	public void autoCamera(float camSpeed, float zoomFactor) {
+	public void autoCamera(float camFactor, float zoomFactor) {
+		if(key(Keys.O))
+			zoomIn(zoomFactor);
+		if(key(Keys.L))
+			zoomOut(zoomFactor);
+		
+		float camSpeed = camFactor * camera.zoom;
+		
+		
 		if(key(Keys.W))
 			translate(0, camSpeed);
 		if(key(Keys.S))
@@ -353,13 +505,28 @@ public abstract class Sketch implements SketchTool
 		if(key(Keys.D))
 			translate(camSpeed, 0);
 		
-		if(key(Keys.O))
-			zoomIn(zoomFactor);
-		if(key(Keys.L))
-			zoomOut(zoomFactor);
+		
 		camera.update();
 			
 	}
+
+	@Override
+	public IntMatrix imatrix(int width, int height) {
+		return new IntMatrix(width, height);
+	}
+
+	@Override
+	public FloatMatrix fmatrix(int width, int height) {
+		return new FloatMatrix(width, height);
+	}
+	
+	
+	
+	
+	
+	/*generic typing system*/
+	
+	
 	
 	
 	

@@ -3,9 +3,15 @@ package app.phoenixshell.kelpie2d.draw;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+
+import app.phoenixshell.kelpie2d.draw.Structs.ComplexShape;
+import app.phoenixshell.kelpie2d.draw.Structs.FloatMatrix;
+import app.phoenixshell.kelpie2d.draw.Structs.IntMatrix;
 
 
 /** The interface that defines all sketching operations
@@ -14,16 +20,23 @@ import com.badlogic.gdx.math.Vector2;
 
 public interface SketchTool{
 
+	public ShapeRenderer shaperRenderer();
+	
 	/*io calls*/
 	
 	public float mouseX();
 	public float mouseY();
+	public Vector3 mouse();
+	public Vector3 mouseWorld();
+	public boolean click();
+	public void drawCursor(Color color, float size);
 	
 	
 	/*callbacks*/
 	public void draw();
 	public void setup();
-	public void overlay();
+
+	public void overlay(UIBatch batch);
 	public void update(float delta);
 	
 	public float width();
@@ -46,6 +59,7 @@ public interface SketchTool{
 	public float rfloat(float bound);
 	public int rint(int bound);
 	public float noise(float x, float y);
+	public float noise(float x, float y, float z);
 	public double distance(float x1, float y1, float x2, float y2);
 	public double distance(Vector2 p1, Vector2 p2);
 	
@@ -68,6 +82,8 @@ public interface SketchTool{
 	
 	
 	/*drawing functions*/
+	public void draw(ComplexShape shape, float x, float y, float rotation);
+	
 	public Texture texture(String path);
 	
 	public  void fill(Color color);
@@ -88,6 +104,11 @@ public interface SketchTool{
 	public void line(Vector2 p1, Vector2 p2);
 	public void line(float[] v1, float[] v2);
 	public void line(float x1, float y1, float x2, float y2);
+	
+	public void tri(float x1, float y1, float x2, float y2, float x3, float y3);
+	
+	public void triat(float x, float y, float width, float height);
+	public void triat(float x, float y, float width, float height, float rotation);
 	
 
 	public void resize(int width, int height);
@@ -111,6 +132,13 @@ public interface SketchTool{
 	
 	/*time fucntions*/
 	public float elapsed();
+	
+	
+	/*collections*/
+	public IntMatrix imatrix(int width, int height);
+	public FloatMatrix fmatrix(int width, int height);
+	
+	
 	
 	
 }
