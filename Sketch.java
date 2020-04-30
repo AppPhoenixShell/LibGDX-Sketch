@@ -28,7 +28,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import app.phoenixshell.kelpie2d.draw.Structs.ComplexShape;
 import app.phoenixshell.kelpie2d.draw.Structs.FloatMatrix;
 import app.phoenixshell.kelpie2d.draw.Structs.IntMatrix;
-import app.phoenixshell.kelpie2d.toolkit.Kelpie2DToolkit;
+
 
 /**
  *  The main implementation of the SketchTool. Contains all the drawing & math functions
@@ -37,7 +37,7 @@ import app.phoenixshell.kelpie2d.toolkit.Kelpie2DToolkit;
 
 public abstract class Sketch implements SketchTool
 {
-	private Kelpie2DToolkit kelpieToolkit;
+	//private Kelpie2DToolkit kelpieToolkit;
 	
 	private int VHeight = 800;
 	private int VWIDTH = 1080;
@@ -74,9 +74,11 @@ public abstract class Sketch implements SketchTool
 	Camera miniCam;
 	Viewport miniView;
 	
+	/*
 	public Kelpie2DToolkit getToolkit() {
 		return kelpieToolkit;
 	}
+	*/
 	
 	
 	@Override
@@ -132,9 +134,11 @@ public abstract class Sketch implements SketchTool
 	}
 
 
+	/*
 	public void onCreate(Kelpie2DToolkit kelpieToolkit) {
 		this.kelpieToolkit = kelpieToolkit;
 	}
+	*/
 	
 	public Vector3 mouse() {
 

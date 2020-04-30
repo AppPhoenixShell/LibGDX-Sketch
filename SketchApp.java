@@ -6,8 +6,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
-import app.phoenixshell.kelpie2d.toolkit.Kelpie2DToolkitCSID;
-import app.phoenixshell.kelpie2d.toolkit.cli.ToolkitUIHandler;
+
 
 /**  SketchApp is an extension of a LibGDX game. This is how you
  * run the Sketch in LibGDX. To use first implement SketchApp.
@@ -18,8 +17,8 @@ import app.phoenixshell.kelpie2d.toolkit.cli.ToolkitUIHandler;
 public abstract class SketchApp extends Game
 {	
 	Sketch sketch;
-	Kelpie2DToolkitCSID kelpieToolkit;
-	ToolkitUIHandler uiHandler;
+	//Kelpie2DToolkitCSID kelpieToolkit;
+	//ToolkitUIHandler uiHandler;
 	
 	public SketchApp() {
 		
@@ -28,7 +27,7 @@ public abstract class SketchApp extends Game
 	
 	public abstract Sketch createSketch();
 	public abstract void onCreate(Sketch sketch);
-	public abstract ToolkitUIHandler createUIHandler();
+	//public abstract ToolkitUIHandler createUIHandler();
 	
 	@Override
 	public final void resize(int width, int height) {
@@ -45,16 +44,16 @@ public abstract class SketchApp extends Game
 	@Override
 	public final void create() {
 		sketch = createSketch();
-		uiHandler = createUIHandler();
+		//uiHandler = createUIHandler();
 		
-		kelpieToolkit = new Kelpie2DToolkitCSID(uiHandler);
+		//kelpieToolkit = new Kelpie2DToolkitCSID(uiHandler);
 		
-		sketch.onCreate(kelpieToolkit);
+		//sketch.onCreate(kelpieToolkit);
 			
 		
 		onCreate(sketch);
 		sketch.setup();
-		uiHandler.runUI(kelpieToolkit);
+		//uiHandler.runUI(kelpieToolkit);
 	}
 
 	@Override
