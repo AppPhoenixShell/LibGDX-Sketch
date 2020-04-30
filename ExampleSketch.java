@@ -138,6 +138,7 @@ public class ExampleSketch extends Sketch
 
 	@Override
 	public void setup() {
+		System.out.println("running sketch");
 		Label label = new Label("hello stage", new LabelStyle(new BitmapFont(), Color.WHITE));
 		//stage.addActor(label);
 		
